@@ -21,34 +21,38 @@ import java.io.IOException;
  * JavaFX App
  */
 public class App extends Application {
-    //Her står globale variabler
+    //Her står globale variabler/konstanter
     public ExecutorService executor = Executors.newCachedThreadPool(); //har ikke brukt enda
-    public final static int VINDU_BREDDE = 600; //Vinduets bredde i px
-    public final static int VINDU_HØYDE = 500; //Vinduets høyde i px
+    public final static int VINDU_BREDDE = 800; //Vinduets bredde i px
+    public final static int VINDU_HØYDE = 600; //Vinduets høyde i px
     public final static int VEI_BREDDE = 100; //Vinduets bredde i px
-    private Trafikklys t1, t2, t3, t4; //trafikklys
-    private ArrayList<Trafikklys> trafikklysTab = new ArrayList<>();
-    private ArrayList<Bil> bilerTab = new ArrayList<>();
-    private ArrayList<StartPosisjon> startPosTab = new ArrayList<>();
+   
     private Pane hovedpanel = new Pane(); //Hovedpanelet (Der alt legges til)
-    private Bil bil = new Bil();
-    private double margin = 10; //setter margin til 10 piksler
-    private static Scene scene;
+    private ArrayList<Bil> bilerTab = new ArrayList<>();
+    private final int margin = 10;
+    private ArrayList<Veikryss> veikryssTab = new ArrayList<>();
+    private ArrayList<Trafikklys> nordSørLys = new ArrayList<>();
+    private ArrayList<Trafikklys> østVestLys = new ArrayList<>();
 
     @Override
     public void start(Stage stage) throws IOException {
-        //Tegner bakgrunn
-        tegnBakgrunn(hovedpanel);
+       
+        tegnBakgrunn(hovedpanel); //Tegner bakgrunn
+        
+        veikryssTab.add(new Veikryss(hovedpanel, 200, 150, VEI_BREDDE, true, false, false, true)); // Øvre venstre
+        veikryssTab.add(new Veikryss(hovedpanel, 600, 150, VEI_BREDDE, true, true, false, false)); // Øvre høyre
+        veikryssTab.add(new Veikryss(hovedpanel, 200, 450, VEI_BREDDE, false, false, true, true)); // Nedre venstre
+        veikryssTab.add(new Veikryss(hovedpanel, 600, 450, VEI_BREDDE, false, true, true, false)); // Nedre høyre
+        
+        // Start trafikklys og bil-logikk for hvert kryss
+        for (Veikryss kryss : veikryssTab) {
+            startTrafikklysLogikk();
+            startBilLogikk(kryss);
+        }
 
-        //tegner trafikklys
-        tegnTrafikkLys();
+        flyttBil();
 
-        //executer tråd for endring av status
-        endreTrafikkLys();
-
-        //Tegner biler
-        tegnBiler();
-
+        //Setter opp scenen
         Scene scene = new Scene(hovedpanel, VINDU_BREDDE, VINDU_HØYDE);
         stage.setScene(scene);
         stage.setTitle("Veikryss");
@@ -59,19 +63,65 @@ public class App extends Application {
         launch();
     }
 
-    /*Denne metoden går igjennom trafikklystabellen
-    * og endrer farge fra rødt til grønt ved hjelp av en
-    * for-løkke og endrestatus() metoden som ligger i trafikklys
-    * Dette gjøres hvert 3.sekund, men kan endres i Thread.sleep()*/
-    public void endreTrafikkLys() {
-        //tråd som skifter mellom rød og grønn (boolean true/false)
+    private void startTrafikklysLogikk() {
+        // Del trafikklysene inn i grupper basert på retning
+        for (Veikryss kryss : veikryssTab) {
+            for (Trafikklys lys : kryss.getTrafikklysTab()) {
+                if (lys.getVinkel() == 0 || lys.getVinkel() == 180) { // Nord/Sør
+                    nordSørLys.add(lys);
+                } else if (lys.getVinkel() == 90 || lys.getVinkel() == 270) { // Øst/Vest
+                    østVestLys.add(lys);
+                }
+            }
+        }
+
+        // Starter en tråd for å oppdatere trafikklysene
         new Thread(() -> {
             try {
-                while(true) {
-                    for(Trafikklys t: trafikklysTab) {
-                        Platform.runLater(() -> t.endreStatus());
-                    }
-                    Thread.sleep(3000); //endre skifting hastighet
+                while (true) {
+                    // Sett nord/sør til grønt og øst/vest til rødt
+                    Platform.runLater(() -> {
+                        for (Trafikklys lys : nordSørLys) {
+                            lys.setStatus(2); // Grønt
+                        }
+                        for (Trafikklys lys : østVestLys) {
+                            lys.setStatus(0); // Rødt
+                        }
+                    });
+                    Thread.sleep(5000); // Vent 3 sekunder
+
+                    // Sett begge grupper til gult
+                    Platform.runLater(() -> {
+                        for (Trafikklys lys : nordSørLys) {
+                            lys.setStatus(1); // Gult
+                        }
+                        for (Trafikklys lys : østVestLys) {
+                            lys.setStatus(1); // Gult
+                        }
+                    });
+                    Thread.sleep(2000); // Vent 1 sekund
+
+                    // Sett nord/sør til rødt og øst/vest til grønt
+                    Platform.runLater(() -> {
+                        for (Trafikklys lys : nordSørLys) {
+                            lys.setStatus(0); // Rødt
+                        }
+                        for (Trafikklys lys : østVestLys) {
+                            lys.setStatus(2); // Grønt
+                        }
+                    });
+                    Thread.sleep(5000); // Vent 3 sekunder
+
+                    // Sett begge grupper til gult
+                    Platform.runLater(() -> {
+                        for (Trafikklys lys : nordSørLys) {
+                            lys.setStatus(1); // Gult
+                        }
+                        for (Trafikklys lys : østVestLys) {
+                            lys.setStatus(1); // Gult
+                        }
+                    });
+                    Thread.sleep(1000); // Vent 1 sekund
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -79,49 +129,24 @@ public class App extends Application {
         }).start();
     }
 
-    /*Denne metoden tegner biler i en av fire tilfeldige
-    * posisjoner. Ved hjelp av tråden i denne metoden
-    * legges biler til hvert 2.sekund */
-    public void tegnBiler() {
-        //lager en tabell for de ulike startposisjonene
-        //Det er fire ulike startposisjoner for hver vei
-        //Det er fire forskjellige vinkler
-        startPosTab.add(new StartPosisjon(VINDU_BREDDE/2+margin,
-                VINDU_HØYDE+bil.getBilHøyde(), 0));
-        startPosTab.add(new StartPosisjon(0-bil.getBilHøyde(),
-                VINDU_HØYDE/2-margin, 90));
-        startPosTab.add(new StartPosisjon(VINDU_BREDDE + bil.getBilHøyde(),
-                VINDU_HØYDE/2-(bil.getBilBredde())*2+margin, 270));
-        startPosTab.add(new StartPosisjon(VINDU_BREDDE/2-margin-bil.getBilBredde(),
-                0-bil.getBilHøyde(), 180));
-
-
-
-
-        /*Denne tråden legger kontinuerlig til biler
-        * til hovedpanelet hvert 2. sekund.
-        * De tegnes i en av fire posisjoner
-        * som er lagt til i startposisjontabellen.  */
+    private void startBilLogikk(Veikryss kryss) {
         new Thread(() -> {
-            while(true) {
-                //tilfeldig retning 1-4 basert på indeksen til startPosTab
-                int tilfeldig = (int)(Math.random() * 4);
-                bil = new Bil(startPosTab.get(tilfeldig).getStartX(), startPosTab.get(tilfeldig).getStartY(),
-                        Color.rgb((int) (Math.random()*256), (int) (Math.random()*256),
-                                (int) (Math.random()*256)), startPosTab.get(tilfeldig).getRetning(), trafikklysTab.get(tilfeldig));
-                synchronized (bilerTab) {
-                    bilerTab.add(bil);
+            try {
+                while (true) {
+                    Platform.runLater(() -> {
+                        Bil nyBil = kryss.genererBil(); // Generer en ny bil
+                        if (nyBil != null) {
+                            synchronized (bilerTab) {
+                                bilerTab.add(nyBil); // Legg til bilen i bilerTab
+                            }
+                        }
+                    });
+                    Thread.sleep(2000); // Juster bilspawn-intervall her
                 }
-                Platform.runLater(() -> hovedpanel.getChildren().add(bil.lagBilGruppe()));
-                try {
-                    Thread.sleep(2000); //juster bilspawn intervall her
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }).start();
-
-        flyttBil();
     }
 
     /*Denne metoden flytter bilene. Alle bilene som opprettes i
@@ -138,14 +163,13 @@ public class App extends Application {
                 while(true) {
                     synchronized (bilerTab) {
                         for (Bil b : bilerTab) {
-                            //vent på rødt lys
                             //finner en tilfeldig retning
-                            svingTilfeldig(b);
+                            sjekkOgSving(b); // NB! skal fikse
 
                             Platform.runLater(() -> b.flyttBil());
                         }
                     }
-                    Thread.sleep(4); //juster farten her
+                    Thread.sleep(8); //juster farten her
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -153,12 +177,25 @@ public class App extends Application {
         }).start();
     }
 
+    //Metode sjekkOgSving
+    private void sjekkOgSving(Bil b) {
+        for (Veikryss kryss : veikryssTab) { // Gå gjennom alle veikryss
+            if (Math.abs(b.getXPos() - kryss.getX()) < margin && Math.abs(b.getYPos() - kryss.getY()) < margin) {
+                svingTilfeldig(b, kryss); // Kall metoden for å svinge bilen med riktig veikryss
+                break; // Unngå å sjekke flere kryss for samme bil
+            }
+        }
+    }
+
     /*Denne metoden svinger en gitt bil
     * etter den har passert inn i kysset. Tilfeldig tall trekkes
     * ved bruk av Math.random(). De to øverste if setningene
     * gjelder for biler som kjører vertikalt. De to nederste er for bilene
-    * opprinnelig kjører horisontalt  */
-    private void svingTilfeldig(Bil b) {
+    * opprinnelig kjører horisontalt */
+    private void svingTilfeldig(Bil b, Veikryss kryss) {
+        
+        // NB! Fungerer ikke nå etter at det gikk fra ett til fire veikryss!
+
         int tilfeldig = (int) (Math.random() * 3) + 1; //tre forskjellige muligheter
         boolean skiftet = b.harSvingt; //legg heller til i objektet bil
         //kjører i tilfeldig retning retning høyre, rett fram eller venstre
@@ -183,53 +220,42 @@ public class App extends Application {
         }
     }
 
-
-    /*Denne metoden oppretter fire trafikklys
-    * og plasseres på høyre side for hver vei ovenfor krysset */
-    private void tegnTrafikkLys() {
-        t1 = new Trafikklys(VINDU_BREDDE/2+VEI_BREDDE, VEI_BREDDE, 0, true);
-        t2 = new Trafikklys(VINDU_BREDDE/2+VEI_BREDDE, VINDU_HØYDE/2+VEI_BREDDE, 90, false);
-        t3 = new Trafikklys(VINDU_BREDDE/2-VEI_BREDDE-VEI_BREDDE/4,
-                VINDU_HØYDE/2-VEI_BREDDE-VEI_BREDDE/4, 270, false);
-        t4 = new Trafikklys(VINDU_BREDDE/2-VEI_BREDDE-VEI_BREDDE/4,
-                VINDU_HØYDE/2+VEI_BREDDE, 180, true);
-        trafikklysTab.add(t1);
-        trafikklysTab.add(t2);
-        trafikklysTab.add(t3);
-        trafikklysTab.add(t4);
-        hovedpanel.getChildren().addAll(t1.lagTrafikklys(), t2.lagTrafikklys(),
-                t3.lagTrafikklys(), t4.lagTrafikklys());
-    }
-
-
-
     //metode som tegner bakgrunnn (Denne er laget ved bruk av KI)
     private void tegnBakgrunn(Pane root) {
-        // Tegn vertikal vei
-        Rectangle verticalRoad = new Rectangle(VINDU_BREDDE / 2 - VEI_BREDDE / 2, 0, VEI_BREDDE, VINDU_HØYDE);
-        verticalRoad.setFill(Color.DARKGRAY);
+        // Tegn vertikale veier
+        Rectangle verticalRoad1 = new Rectangle(200 - VEI_BREDDE / 2, 0, VEI_BREDDE, VINDU_HØYDE);
+        Rectangle verticalRoad2 = new Rectangle(600 - VEI_BREDDE / 2, 0, VEI_BREDDE, VINDU_HØYDE);
+        verticalRoad1.setFill(Color.DARKGRAY);
+        verticalRoad2.setFill(Color.DARKGRAY);
 
-        // Tegn horisontal vei
-        Rectangle horizontalRoad = new Rectangle(0, VINDU_HØYDE / 2 - VEI_BREDDE / 2, VINDU_BREDDE, VEI_BREDDE);
-        horizontalRoad.setFill(Color.DARKGRAY);
+        // Tegn horisontale veier
+        Rectangle horizontalRoad1 = new Rectangle(0, 150 - VEI_BREDDE / 2, VINDU_BREDDE, VEI_BREDDE);
+        Rectangle horizontalRoad2 = new Rectangle(0, 450 - VEI_BREDDE / 2, VINDU_BREDDE, VEI_BREDDE);
+        horizontalRoad1.setFill(Color.DARKGRAY);
+        horizontalRoad2.setFill(Color.DARKGRAY);
 
-        root.getChildren().addAll(verticalRoad, horizontalRoad);
+        root.getChildren().addAll(verticalRoad1, verticalRoad2, horizontalRoad1, horizontalRoad2);
 
-        // Tegn midtlinjer
+        // Tegn midtlinjer for vertikale veier
         for (int y = 0; y < VINDU_HØYDE; y += 20) {
-            Line vLine = new Line(VINDU_BREDDE / 2, y, VINDU_BREDDE / 2, y + 10);
-            vLine.setStroke(Color.YELLOW);
-            vLine.getStrokeDashArray().addAll(10.0, 10.0);
-            vLine.setStrokeWidth(3);
-            root.getChildren().add(vLine);
+            Line vLine1 = new Line(200, y, 200, y + 10);
+            Line vLine2 = new Line(600, y, 600, y + 10);
+            vLine1.setStroke(Color.YELLOW);
+            vLine2.setStroke(Color.YELLOW);
+            vLine1.setStrokeWidth(3);
+            vLine2.setStrokeWidth(3);
+            root.getChildren().addAll(vLine1, vLine2);
         }
 
+        // Tegn midtlinjer for horisontale veier
         for (int x = 0; x < VINDU_BREDDE; x += 20) {
-            Line hLine = new Line(x, VINDU_HØYDE / 2, x + 10, VINDU_HØYDE / 2);
-            hLine.setStroke(Color.YELLOW);
-            hLine.getStrokeDashArray().addAll(10.0, 10.0);
-            hLine.setStrokeWidth(3);
-            root.getChildren().add(hLine);
+            Line hLine1 = new Line(x, 150, x + 10, 150);
+            Line hLine2 = new Line(x, 450, x + 10, 450);
+            hLine1.setStroke(Color.YELLOW);
+            hLine2.setStroke(Color.YELLOW);
+            hLine1.setStrokeWidth(3);
+            hLine2.setStrokeWidth(3);
+            root.getChildren().addAll(hLine1, hLine2);
         }
     }
 

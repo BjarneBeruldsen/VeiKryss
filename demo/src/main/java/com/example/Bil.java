@@ -51,22 +51,33 @@ public class Bil extends Figur{
         this(0, 0, Color.RED, 0, null);
     }
 
-    //metode som flytter bilen. Dette gjøres
-    //basert på retningen den kjøer i
+    //metode som flytter bilen. 
+    // Dette gjøres basert på retningen den kjører i
     public void flyttBil() {
-        int retning = (int)(vinkel);
-        switch (retning) {
-            //vertikalt oppover
-            case 0: r.setY(r.getY()-1); break;
-            //vertikalt nedover
-            case 180: r.setY(r.getY()+1); break;
-            //horisontalt til høyre
-            case 270: r.setX(r.getX()-1); break;
-            //horisontalt til  venstre
-            case 90: r.setX(r.getX()+1); break;
+        double hasighet = 2; // Hastigheten bilen beveger seg med
+
+        switch ((int) vinkel) {
+            case 0: // Nedover
+                yPos += hasighet;
+                break;
+            case 90: // Mot venstre
+                xPos -= hasighet;
+                break;
+            case 180: // Oppover
+                yPos -= hasighet;
+                break;
+            case 270: // Mot høyre
+                xPos += hasighet;
+                break;
         }
+
+        oppdaterPosisjon(); // Oppdater grafisk posisjon
     }
 
+    private void oppdaterPosisjon() {
+        r.setX(xPos);
+        r.setY(yPos);
+    }
 
     /**
      *
@@ -80,7 +91,6 @@ public class Bil extends Figur{
 
         //setter farge
         r.setFill(farge);
-
         r.setRotate(vinkel);
 
         return r;
@@ -131,6 +141,10 @@ public class Bil extends Figur{
     //metode som henter bilhøyden
     public double getBilHøyde() {
         return BIL_HØYDE;
+    }
+
+    public boolean harSvingt() {
+        return harSvingt;
     }
 
     //metode som returnerer om bilen allerede har svingt 1 gang
