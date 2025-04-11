@@ -3,6 +3,8 @@ package com.example;
 import javafx.scene.layout.Pane;
 import java.util.ArrayList;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 
 public class Veikryss {
 
@@ -22,8 +24,89 @@ public class Veikryss {
         this.startX = startX;
         this.startY = startY;
         this.veiBredde = veiBredde;
+
+        tegnVeier(panel);
         opprettTrafikklys(startX, startY);
         opprettGyldigeStartPosisjoner(startX, startY, spawnTopp, spawnHøyre, spawnBunn, spawnVenstre);
+    }
+
+    // Tegner veiene i veikrysset
+    private void tegnVeier(Pane pane) {
+        Rectangle vertikalVei = new Rectangle(startX - veiBredde/2, startY - 300, veiBredde, 600);
+        Rectangle horisontalVei = new Rectangle(startX - 300, startY - veiBredde/2, 600, veiBredde);
+        vertikalVei.setFill(Color.rgb(105, 105, 105));
+        horisontalVei.setFill(Color.rgb(105,105,105));
+        pane.getChildren().addAll(vertikalVei, horisontalVei);
+
+        for (int y = (int) startY - 300; y < startY + 300; y += 20) {
+            Line vLinje = new Line(startX, y, startX, y + 10);
+            vLinje.setStroke(Color.YELLOW);
+            vLinje.setStrokeWidth(2);
+            pane.getChildren().add(vLinje);
+        }
+
+        for (int x = (int) startX - 300; x < startX + 300; x += 20) {
+            Line hLinje = new Line(x, startY, x + 10, startY);
+            hLinje.setStroke(Color.YELLOW);
+            hLinje.setStrokeWidth(2);
+            pane.getChildren().add(hLinje);
+        }
+    }
+
+    // Sjekker om koordinatene er innenfor veikrysset
+    public boolean erInniKrysset(double x, double y) {
+        int margin = 15;
+        return Math.abs(x - startX) < margin && Math.abs(y - startY) < margin;
+    }
+
+    //TBC!!!!!!!!!!!!!!!!!!!!!
+    private double hentYKoordinatForRetning(int nyRetning) {
+        for (StartPosisjon sp: gyldigeStartPosTab) {
+            if (sp.getRetning() == nyRetning) {
+                return sp.getStartY();
+            }
+        }
+        return startY;
+    }
+
+    //TBC!!!!!!!!!!!!!!!!!!!!
+    private double hentXKoordinatForRetning(int nyRetning) {
+        for (StartPosisjon sp: gyldigeStartPosTab) {
+            if (sp.getRetning() == nyRetning) {
+                return sp.getStartX();
+            }
+        }
+        return startX;
+    }
+
+
+    // Svinger tilfeldig om bilen er i veikrysset
+    public void svingBilHvisNødvendig(Bil b) {
+        if (!b.harSvingt() && erInniKrysset(b.getXPos(), b.getYPos())) {
+            int tilfeldig = (int) (Math.random() * 3 + 1); // 1 = rett frem, 2 = høyre, 3 = venstre
+                                                           // (sett fra bilens perspektiv)
+            int v = (int) b.getVinkel();
+
+            if (tilfeldig == 2) { //Høyresving
+                switch (v) {
+                    case 0: b.setVinkel(270); b.setYPos(hentYKoordinatForRetning(270)); break;
+                    case 90: b.setVinkel(0); b.setXPos(hentXKoordinatForRetning(0)); break;
+                    case 180: b.setVinkel(90); b.setYPos(hentYKoordinatForRetning(90)); break; 
+                    case 270: b.setVinkel(180); b.setXPos(hentXKoordinatForRetning(180)); break;
+                }
+                b.harSvingt = true;
+            } else if (tilfeldig == 3) { //Venstresving
+                switch (v) {
+                    case 0: b.setVinkel(90); b.setYPos(hentYKoordinatForRetning(90)); break;
+                    case 90: b.setVinkel(180); b.setXPos(hentXKoordinatForRetning(180)); break;
+                    case 180: b.setVinkel(270); b.setYPos(hentYKoordinatForRetning(270)); break;
+                    case 270: b.setVinkel(0); b.setXPos(hentXKoordinatForRetning(0)); break;
+                }
+                b.harSvingt = true;
+            } else {
+                b.harSvingt = true; //Rett frem (teknisk sett ikke svingt, men tatt valget)
+            }
+        }
     }
     
     // Oppretter fire trafikklys for veikrysset
@@ -46,7 +129,7 @@ public class Veikryss {
         trafikklysTab.add(t4);
 
         // Legg trafikklysene til panelet
-        panel.getChildren().addAll(t1.lagTrafikklys(), t2.lagTrafikklys(), t3.lagTrafikklys(), t4.lagTrafikklys());
+        panel.getChildren().addAll(t1.getGruppe(), t2.getGruppe(), t3.getGruppe(), t4.getGruppe());
     }
 
     // Oppretter gyldige startposisjoner for biler i veikrysset

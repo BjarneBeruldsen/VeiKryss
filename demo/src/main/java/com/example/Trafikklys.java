@@ -2,7 +2,6 @@ package com.example;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -11,9 +10,9 @@ import javafx.scene.shape.Rectangle;
 import static com.example.App.VEI_BREDDE;
 
 public class Trafikklys extends Figur{
-    private Group gruppe = new Group();
-    private Circle rød, gul, grønn;
-    private Pane root;
+    private Group gruppe = new Group(); //Gruppe som inneholder alle elementene i trafikklyset
+    private Rectangle trafikklysBoks;   //Boksen til trafikklyset
+    private Circle rød, gul, grønn;     //Det tre lysene (Rødt, gult og grønt)
     private int status; //status 0 = rødt, 1 = gult, 2 = grønt
     private double vinkel; // vinkel på trafikklyset
 
@@ -21,76 +20,63 @@ public class Trafikklys extends Figur{
         super(xPos, yPos);
         this.vinkel = vinkel;
         this.status = status;
-    }
 
-    //lager trafikklys gruppe
-    //setter sammen svart rektangel, rød og grønn sirkel for lys
-    public Group lagTrafikklys() {
         double bredde = VEI_BREDDE/4;
         double høyde = VEI_BREDDE/2;
-        double padding = 13;
-
-        //tegner boksen
-        Rectangle r = new Rectangle(bredde, høyde-2, Color.BLACK);
+        double padding = 13;  
+        
+        trafikklysBoks = new Rectangle(bredde, høyde-2, Color.BLACK);
+        trafikklysBoks.setStroke(Color.rgb(120,120,120));
 
         //tegner rødt og grønt lys
-        // NB! skal endre slik at det blir dynamisk, (ikke hardkodet/skrive -5)
         rød = new Circle(bredde/2, bredde/6+(padding)-5, bredde/4);
         gul = new Circle(bredde/2, bredde/6+(padding*2)-5, bredde/4);
         grønn = new Circle(bredde/2, bredde/6+(padding*3)-5, bredde/4);
         
+        //Gir dem farge (+ mørkegrå kant)
         rød.setFill(Color.rgb(255, 0, 0));
+        rød.setStroke(Color.rgb(60, 60, 60)); 
         gul.setFill(Color.rgb(255,255,0));
+        gul.setStroke(Color.rgb(60, 60, 60));        
         grønn.setFill(Color.rgb(9, 220, 0));
+        grønn.setStroke(Color.rgb(60, 60, 60));
 
-        gruppe.getChildren().addAll(r, rød, gul, grønn);
+        //Plasserer alle elementene i gruppen
+        gruppe.getChildren().addAll(trafikklysBoks, rød, gul, grønn);
 
-        gruppe.setLayoutX(xPos);
-        gruppe.setLayoutY(yPos);
-        gruppe.setRotate(vinkel);
-
-        return gruppe;
+        // Setter opp lysene i riktig posisjon og vinkel
+        gruppe.setLayoutX(xPos); // punkt på X-aksen
+        gruppe.setLayoutY(yPos); // punkt på Y-aksen
+        gruppe.setRotate(vinkel); // Basert på veien det hører til
     }
 
     //metode som endrer status (farge) på lysene
     public void endreStatus() {
-        status = (status + 1) % 3;
-        
-        // Fjerner alle lysene
-        gruppe.getChildren().removeAll(rød, gul, grønn);
-
-        if(status == 0) { // Rødt lys
-           rød.setFill(Color.rgb(255, 0, 0)); // På
-           gul.setFill(Color.rgb(128, 128, 5)); // Av
-           grønn.setFill(Color.rgb(9, 74, 0));  // Av
-        } else if (status == 1) { // Gult lys
-            rød.setFill(Color.rgb(120, 0, 0)); // Av
-            gul.setFill(Color.rgb(255, 255, 0)); // På
-            grønn.setFill(Color.rgb(9, 74, 0)); // Av
-        } else if (status == 2) { // Grønt lys
-            rød.setFill(Color.rgb(120, 0, 0)); // Av
-            gul.setFill(Color.rgb(128, 128, 0)); // Av
-            grønn.setFill(Color.rgb(17, 235, 0)); // På
-        }
-        
-        // Legger til lysene igjen
-        gruppe.getChildren().addAll(rød, gul, grønn);
+        status = (status + 1) % 3; // Loop (0 -> 1 -> 2 -> 0, osv.)
+        oppdaterLys(); // Oppdaterer lysene basert på ny status
     }
 
+    //metode som oppdaterer lysene basert på status
     private void oppdaterLys() {
         if (status == 0) { // Rødt lys
             rød.setFill(Color.rgb(255, 0, 0)); // På
-            gul.setFill(Color.rgb(128, 128, 5)); // Av
-            grønn.setFill(Color.rgb(9, 74, 0));  // Av
+            gul.setFill(Color.rgb(64, 64, 5)); // Av
+            grønn.setFill(Color.rgb(9, 64, 0));  // Av
         } else if (status == 1) { // Gult lys
             rød.setFill(Color.rgb(120, 0, 0)); // Av
             gul.setFill(Color.rgb(255, 255, 0)); // På
-            grønn.setFill(Color.rgb(9, 74, 0)); // Av
+            grønn.setFill(Color.rgb(9, 64, 0)); // Av
         } else if (status == 2) { // Grønt lys
             rød.setFill(Color.rgb(120, 0, 0)); // Av
-            gul.setFill(Color.rgb(128, 128, 0)); // Av
+            gul.setFill(Color.rgb(64, 64, 0)); // Av
             grønn.setFill(Color.rgb(17, 235, 0)); // På
         }
+    }
+
+    //getMetode for gruppe (henter selve lyset)
+    // pga. lagTrafikklys()-metoden ble flyttet inn i konstruktøren.
+    public Group getGruppe() {
+        return gruppe;
     }
 
     //setMetode for status

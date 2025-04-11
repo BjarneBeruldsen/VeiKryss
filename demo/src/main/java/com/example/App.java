@@ -37,8 +37,9 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
        
-        tegnBakgrunn(hovedpanel); //Tegner bakgrunn
-        
+        Rectangle gress = new Rectangle(0, 0, VINDU_BREDDE, VINDU_HØYDE);
+        gress.setFill(Color.GREEN);
+        hovedpanel.getChildren().add(gress);
         veikryssTab.add(new Veikryss(hovedpanel, 200, 150, VEI_BREDDE, true, false, false, true)); // Øvre venstre
         veikryssTab.add(new Veikryss(hovedpanel, 600, 150, VEI_BREDDE, true, true, false, false)); // Øvre høyre
         veikryssTab.add(new Veikryss(hovedpanel, 200, 450, VEI_BREDDE, false, false, true, true)); // Nedre venstre
@@ -177,86 +178,10 @@ public class App extends Application {
         }).start();
     }
 
-    //Metode sjekkOgSving
     private void sjekkOgSving(Bil b) {
-        for (Veikryss kryss : veikryssTab) { // Gå gjennom alle veikryss
-            if (Math.abs(b.getXPos() - kryss.getX()) < margin && Math.abs(b.getYPos() - kryss.getY()) < margin) {
-                svingTilfeldig(b, kryss); // Kall metoden for å svinge bilen med riktig veikryss
-                break; // Unngå å sjekke flere kryss for samme bil
-            }
+        for (Veikryss kryss : veikryssTab) {
+            kryss.svingBilHvisNødvendig(b);
         }
     }
-
-    /*Denne metoden svinger en gitt bil
-    * etter den har passert inn i kysset. Tilfeldig tall trekkes
-    * ved bruk av Math.random(). De to øverste if setningene
-    * gjelder for biler som kjører vertikalt. De to nederste er for bilene
-    * opprinnelig kjører horisontalt */
-    private void svingTilfeldig(Bil b, Veikryss kryss) {
-        
-        // NB! Fungerer ikke nå etter at det gikk fra ett til fire veikryss!
-
-        int tilfeldig = (int) (Math.random() * 3) + 1; //tre forskjellige muligheter
-        boolean skiftet = b.harSvingt; //legg heller til i objektet bil
-        //kjører i tilfeldig retning retning høyre, rett fram eller venstre
-        if(!skiftet) {
-            if (b.getYPos() == VINDU_HØYDE / 2 && tilfeldig == 2) {
-                b.setVinkel(90); //endrer retning til høyre
-                b.setHarSvingt(true);
-            }
-            if (b.getYPos() == VINDU_HØYDE / 2 - b.getBilHøyde() + margin && tilfeldig == 3) {
-                b.setVinkel(270);
-                b.setHarSvingt(true);
-            }
-
-            if (b.getXPos() == VINDU_BREDDE / 2 && tilfeldig == 2) {
-                b.setVinkel(0);
-                b.setHarSvingt(true);
-            }
-            if (b.getXPos() == VINDU_BREDDE / 2 - b.getBilHøyde() + margin * 2 && tilfeldig == 3) {
-                b.setVinkel(180);
-                b.setHarSvingt(true);
-            }
-        }
-    }
-
-    //metode som tegner bakgrunnn (Denne er laget ved bruk av KI)
-    private void tegnBakgrunn(Pane root) {
-        // Tegn vertikale veier
-        Rectangle verticalRoad1 = new Rectangle(200 - VEI_BREDDE / 2, 0, VEI_BREDDE, VINDU_HØYDE);
-        Rectangle verticalRoad2 = new Rectangle(600 - VEI_BREDDE / 2, 0, VEI_BREDDE, VINDU_HØYDE);
-        verticalRoad1.setFill(Color.DARKGRAY);
-        verticalRoad2.setFill(Color.DARKGRAY);
-
-        // Tegn horisontale veier
-        Rectangle horizontalRoad1 = new Rectangle(0, 150 - VEI_BREDDE / 2, VINDU_BREDDE, VEI_BREDDE);
-        Rectangle horizontalRoad2 = new Rectangle(0, 450 - VEI_BREDDE / 2, VINDU_BREDDE, VEI_BREDDE);
-        horizontalRoad1.setFill(Color.DARKGRAY);
-        horizontalRoad2.setFill(Color.DARKGRAY);
-
-        root.getChildren().addAll(verticalRoad1, verticalRoad2, horizontalRoad1, horizontalRoad2);
-
-        // Tegn midtlinjer for vertikale veier
-        for (int y = 0; y < VINDU_HØYDE; y += 20) {
-            Line vLine1 = new Line(200, y, 200, y + 10);
-            Line vLine2 = new Line(600, y, 600, y + 10);
-            vLine1.setStroke(Color.YELLOW);
-            vLine2.setStroke(Color.YELLOW);
-            vLine1.setStrokeWidth(3);
-            vLine2.setStrokeWidth(3);
-            root.getChildren().addAll(vLine1, vLine2);
-        }
-
-        // Tegn midtlinjer for horisontale veier
-        for (int x = 0; x < VINDU_BREDDE; x += 20) {
-            Line hLine1 = new Line(x, 150, x + 10, 150);
-            Line hLine2 = new Line(x, 450, x + 10, 450);
-            hLine1.setStroke(Color.YELLOW);
-            hLine2.setStroke(Color.YELLOW);
-            hLine1.setStrokeWidth(3);
-            hLine2.setStrokeWidth(3);
-            root.getChildren().addAll(hLine1, hLine2);
-        }
-    }
-
+    
 }
