@@ -1,4 +1,4 @@
-//Authors: Bjarne Beruldsen, Severin Waller Sørensen
+//Authors: Bjarne Beruldsen, Severin Waller Sørensen, Laurent Zogaj & Abdinasir Ali
 
 package com.example;
 
@@ -9,41 +9,43 @@ import javafx.scene.shape.Rectangle;
 //Importerer bredden på veien for å tegne passende bilstørrelse
 import static com.example.App.VEI_BREDDE;
 
-public class Bil extends Figur{
+public class Bil extends Figur {
     //finner bredde og lengde på bil
-    private final static int BIL_BREDDE = VEI_BREDDE/3;
+    private final static int BIL_BREDDE = VEI_BREDDE / 3;
     private final static int BIL_HØYDE = BIL_BREDDE * 2;
 
     //instansvariabler
     protected Color farge;
-    protected Group bilGruppe; //NB! ikke i bruk ATM. (bruk senere for å designe bilene)
+    protected Group bilGruppe = new Group();
     protected Rectangle bilFigur; //Hovedelementet (karosseri til bilen)
     protected double vinkel;
     protected boolean stoppVedRødtLys = false;
     protected boolean erIKrysset = false;
     protected Trafikklys trafikklys;
     protected double hastighet = 2; // Hastigheten bilen beveger seg med
+    private boolean stoppAlleredeLogget = false; // Ny variabel for loggkontroll
 
     //parameterløs konstruktør
     public Bil() {
         this(0, 0, Color.RED, 0, null);
     }
-    
+
     /**
      * @param farge Bilens farge.
      */
     /*Konstruktør som oppretter bil
-    * xPos, yPos er bilens posisjon
-    * farge er bilens farge,
-    * vinkel er bilens vinkel (hvordan rektangelet er orientert)
-    * trafikklys er tilhørende trafikklys basert
-    * på startposisjon */
+     * xPos, yPos er bilens posisjon
+     * farge er bilens farge,
+     * vinkel er bilens vinkel (hvordan rektangelet er orientert)
+     * trafikklys er tilhørende trafikklys basert
+     * på startposisjon */
     public Bil(double xPos, double yPos, Color farge, double vinkel, Trafikklys trafikklys) {
         super(xPos, yPos);
         this.farge = farge;
         this.vinkel = vinkel;
-        bilFigur = this.lagBilGruppe();
         this.trafikklys = trafikklys;
+        bilFigur = this.lagBilGruppe();
+        bilGruppe.getChildren().add(bilFigur);
     }
 
     //metode som flytter bilen basert på retningen
@@ -51,7 +53,7 @@ public class Bil extends Figur{
         if (stoppVedRødtLys) {
             return; // Stopp bilen hvis det er rødt lys
         }
-        
+
         hastighet = 2; // Hastigheten bilen beveger seg med
 
         switch ((int) vinkel) {
@@ -80,13 +82,13 @@ public class Bil extends Figur{
     //metode som får bilen til å svinge
     public void sving(Trafikklys relevantLys) {
         // Finn den opprinnelige retningen basert på trafikklyset
-                    // Bruke KI for å finne en rask/enkel måte så snu retning på
+        // Bruke KI for å finne en rask/enkel måte så snu retning på
         int opprinneligRetning = (relevantLys.getVinkel() + 180) % 360;
-    
+
         // Trekker et tilfeldig tall for å bestemme svingretning
         // 1 = venstre, 2 = høyre, 3 = fortsett
         int valg = (int) (Math.random() * 3) + 1;
-    
+
         // Bestem ny retning og posisjon basert på svingvalg
         // Hvis bilen kommer fra nord
         if (opprinneligRetning == 0) {
@@ -123,20 +125,20 @@ public class Bil extends Figur{
                 default: break;
             }
         }
-    
+
         // Oppdater bilens grafiske posisjon etter sving
         oppdaterPosisjon();
     }
 
-   /**
+    /**
      * @return en rektangel som representerer bilen
      */
     //metode for å tegne bil
     //Dette er egentlig kun et rektangel og ikke en gruppe
-    //TBC: lage en gruppe med flere figurer (hjul, vinduer osv.) 
+    //TBC: lage en gruppe med flere figurer (hjul, vinduer osv.)
     public Rectangle lagBilGruppe() {
         //tegner karoseri til bilen
-        bilFigur = new Rectangle(xPos, yPos, BIL_BREDDE, BIL_HØYDE );
+        bilFigur = new Rectangle(xPos, yPos, BIL_BREDDE, BIL_HØYDE);
         bilFigur.setArcWidth(6); //Runde kanter
         bilFigur.setArcHeight(6); //Runde kanter
 
@@ -153,20 +155,22 @@ public class Bil extends Figur{
      */
     //Denne metoden er kun her, siden jeg laget en
     //abstract getFigur metode i Figur klassen
-    //brukes ikke..
+    @Override
     public Group getFigur() {
-        bilGruppe.getChildren().add(bilFigur);
         return bilGruppe;
     }
 
     //metoder for å kontrollere stopp/start ved rødt lys
     // setter stoppVedRødtLys til true
     public void stoppVedRødtLys() {
-        this.stoppVedRødtLys = true;
+        if (!stoppVedRødtLys) {
+            stoppVedRødtLys = true;
+            stoppAlleredeLogget = false; // Nullstill ved nytt stopp
+        }
     }
     // setter stoppVedRødtLys til false
     public void startVedGrøntLys() {
-        this.stoppVedRødtLys = false;
+        stoppVedRødtLys = false;
     }
 
     /**
@@ -244,10 +248,14 @@ public class Bil extends Figur{
     public boolean sjekkOmIKrysset(Rectangle kryss) {
         return bilFigur.getBoundsInParent().intersects(kryss.getBoundsInParent());
     }
-    
+
+    public boolean erStoppet() {
+        return stoppVedRødtLys;
+    }
+
     public boolean bilenErNærKryss(double kryssX, double kryssY, double veiBredde) {
         double margin = 25; // Hvor langt unna bilen kan være før den skal stoppe
-    
+
         switch ((int) vinkel) {
             case 0: // NED (beveger seg nedover langs y-aksen)
                 return yPos + BIL_HØYDE >= kryssY - veiBredde / 2 - margin;
