@@ -77,6 +77,56 @@ public class Bil extends Figur{
         bilFigur.setY(yPos);
     }
 
+    //metode som får bilen til å svinge
+    public void sving(Trafikklys relevantLys) {
+        // Finn den opprinnelige retningen basert på trafikklyset
+                    // Bruke KI for å finne en rask/enkel måte så snu retning på
+        int opprinneligRetning = (relevantLys.getVinkel() + 180) % 360;
+    
+        // Trekker et tilfeldig tall for å bestemme svingretning
+        // 1 = venstre, 2 = høyre, 3 = fortsett
+        int valg = (int) (Math.random() * 3) + 1;
+    
+        // Bestem ny retning og posisjon basert på svingvalg
+        // Hvis bilen kommer fra nord
+        if (opprinneligRetning == 0) {
+            switch (valg) {
+                case 1: { setXPos(getXPos() + VEI_BREDDE); setYPos(getYPos() + VEI_BREDDE); setVinkel(270); }; break;
+                case 2: { setXPos(getXPos() - VEI_BREDDE/2); setYPos(getYPos() + VEI_BREDDE/2); setVinkel(90); }; break;
+                default: break;
+            }
+        }
+
+        // Hvis bilen kommer fra øst
+        if (opprinneligRetning == 90) {
+            switch (valg) {
+                case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() + VEI_BREDDE); setVinkel(0); }; break;
+                case 2: { setXPos(getXPos() - VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(180); }; break;
+                default: break;
+            }
+        }
+
+        // Hvis bilen kommer fra sør
+        if (opprinneligRetning == 180) {
+            switch (valg) {
+                case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(90); }; break;
+                case 2: { setXPos(getXPos() + VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(270); }; break;
+                default: break;
+            }
+        }
+
+        // hvis bilen kommer fra vest
+        if (opprinneligRetning == 270) {
+            switch (valg) {
+                case 1: { setXPos(getXPos() + VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(180); }; break;
+                case 2: { setXPos(getXPos() + VEI_BREDDE/2); setYPos(getYPos() + VEI_BREDDE/2); setVinkel(0); }; break;
+                default: break;
+            }
+        }
+    
+        // Oppdater bilens grafiske posisjon etter sving
+        oppdaterPosisjon();
+    }
 
    /**
      * @return en rektangel som representerer bilen
@@ -159,6 +209,16 @@ public class Bil extends Figur{
     //returnerer bilens tilhørende trafikklys
     public Trafikklys getTrafikklys() {
         return trafikklys;
+    }
+
+    //setter ny X-verdi
+    public void setXPos(Double newX) {
+        this.xPos = newX;
+    }
+
+    //setter ny Y-verdi
+    public void setYPos(Double newY) {
+        this.yPos = newY;
     }
 
     //returnerer bilen sin nåværende x-posisjon

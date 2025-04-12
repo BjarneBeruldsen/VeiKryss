@@ -139,7 +139,7 @@ public class App extends Application {
                             }
                         }
                     });
-                    Thread.sleep(2000); // Juster bilspawn-intervall her
+                    Thread.sleep(5000); // Juster bilspawn-intervall her
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -170,6 +170,7 @@ public class App extends Application {
                                         b.stoppVedRødtLys(); // Stopp bilen
                                     } else {
                                         b.startVedGrøntLys(); // Fortsett å kjøre
+                                        b.sving(relevantLys);
                                     }
                                 }
                             }

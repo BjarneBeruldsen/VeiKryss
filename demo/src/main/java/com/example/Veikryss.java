@@ -25,6 +25,15 @@ public class Veikryss {
     private double veiBredde; 
     private double startX, startY; //Brukes for å plassere veikrysset (x og y = midten av veikrysset)
 
+    private double motVenstreY;
+    private double motVenstreX;
+    private double motHøyreY;
+    private double motHøyreX;
+    private double motOppY;
+    private double motOppX;   
+    private double motNedY;
+    private double motNedX;
+
     /* Konstruktør for Veikryss
      * Når et nytt veikryss opprettes så sendes det inn: 
      * - Hvilket panel det skal legges i
@@ -125,26 +134,25 @@ public class Veikryss {
         double yJustering = 30;
         
         if (spawnTopp) {
-            double x = (startX  - kjørefeltOffset) - xJustering;
-            double y = startY - ( 1.5 * spawnAvstand);
-            gyldigeStartPosTab.add(new StartPosisjon(x, y, RETNING_NED)); // Nedover
+            motNedX = (startX  - kjørefeltOffset) - xJustering;
+            motNedY = startY - ( 1.5 * spawnAvstand);
+            gyldigeStartPosTab.add(new StartPosisjon(motNedX, motNedY, RETNING_NED)); // Nedover
         }
         if (spawnHøyre) {
-            double x = startX + spawnAvstand + (2 * xJustering);
-            double y = startY - kjørefeltOffset - (yJustering); // Justert Y-koordinat
-            gyldigeStartPosTab.add(new StartPosisjon(x, y, RETNING_VENSTRE)); // Høyre
+            motVenstreX = startX + spawnAvstand + (2 * xJustering);
+            motVenstreY = startY - kjørefeltOffset - (yJustering); // Justert Y-koordinat
+            gyldigeStartPosTab.add(new StartPosisjon(motVenstreX, motVenstreY, RETNING_VENSTRE)); // Høyre
         }
         if (spawnBunn) {
-            double x = (startX + kjørefeltOffset) - xJustering;
-            double y = startY + spawnAvstand;
-            gyldigeStartPosTab.add(new StartPosisjon(x, y, RETNING_OPP)); // Oppover
+            motOppX = (startX + kjørefeltOffset) - xJustering;
+            motOppY = startY + spawnAvstand;
+            gyldigeStartPosTab.add(new StartPosisjon(motOppX, motOppY, RETNING_OPP)); // Oppover
         }
         if (spawnVenstre) {
-            double x = startX - (1.5 * spawnAvstand);
-            double y = startY + kjørefeltOffset - yJustering;
-            gyldigeStartPosTab.add(new StartPosisjon(x, y, RETNING_HØYRE)); // Venstre
+            motHøyreX = startX - (1.5 * spawnAvstand);
+            motHøyreY = startY + kjørefeltOffset - yJustering;
+            gyldigeStartPosTab.add(new StartPosisjon(motHøyreX, motHøyreY, RETNING_HØYRE)); // Venstre
         }
-     
     }
 
     // 
@@ -189,10 +197,38 @@ public class Veikryss {
         return startX;
     }
 
-    // getMetode for startposisjonY
+    // getMetode for startPosisjoner
+    // (slik at bilen kan legge seg i rikig
+    // kjørefelt (koordinater) etter at bilen har svingt.
     public double getY() {
         return startY;
     }
+    public double getMotVenstreX() {
+        return motVenstreX;
+    }
+    public double getMotVenstreY() {
+        return motVenstreY;
+    }
+    public double getMotHøyreX() {
+        return motHøyreX;
+    }
+    public double getMotHøyreY() {
+        return motHøyreY;
+    }
+    public double getMotOppX() {
+        return motOppX;
+    }
+    public double getMotOppY() {
+        return motOppY;
+    }
+    public double getMotNedX() {
+        return motNedX;
+    }
+    public double getMotNedY() {
+        return motNedY;
+    }
+
+
 
     // getMetode for veiBredde
     public double getBredde() {
@@ -219,6 +255,7 @@ public class Veikryss {
                 // GRØNT lys og bilen er ikke i krysset → Kjør inn i krysset
                 bil.flyttBil();
                 bil.setErIKrysset(true); // Merk bilen som "i krysset"
+                bil.sving(trafikkLys); // Kall på sving-metoden
             } else if (trafikkLys.getStatus() == 1 && bil.sjekkOmIKrysset(midtsone)) {
                 // GULT lys og bilen er i krysset → Kjør ferdig
                 bil.flyttBil();
