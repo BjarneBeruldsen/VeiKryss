@@ -1,3 +1,5 @@
+//Author: Bjarne Beruldsen
+
 package com.example;
 /*
 * Denne klassen er laget for å lagre ulike startposisjoner til biler,

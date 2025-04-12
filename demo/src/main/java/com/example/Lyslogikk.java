@@ -1,3 +1,5 @@
+//Author: Severin Waller Sørensen
+
 package com.example;
 
 /* Dette er en klasse som inneholder logikk for lysene i veikrysset.

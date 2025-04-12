@@ -1,3 +1,5 @@
+//Authors: Bjarne Beruldsen, Severin Waller Sørensen
+
 package com.example;
 
 import javafx.scene.Group;

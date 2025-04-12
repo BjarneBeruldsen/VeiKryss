@@ -1,3 +1,5 @@
+//Author: Severin Waller Sørensen
+
 package com.example;
 
 import javafx.scene.layout.Pane;
