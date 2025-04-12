@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 
@@ -26,6 +25,12 @@ public class App extends Application {
     public final static int VINDU_BREDDE = 800; //Vinduets bredde i px
     public final static int VINDU_HØYDE = 600; //Vinduets høyde i px
     public final static int VEI_BREDDE = 100; //Vinduets bredde i px
+
+    // Konstanter for retningene
+    final static int RETNING_NED = 0; // Beveger seg nedover
+    final static int RETNING_VENSTRE = 90; // Beveger seg til venstre
+    final static int RETNING_OPP = 180; // Beveger seg oppover
+    final static int RETNING_HØYRE = 270; // Beveger seg til høyre
    
     private Pane hovedpanel = new Pane(); //Hovedpanelet (Der alt legges til)
     private ArrayList<Bil> bilerTab = new ArrayList<>();
@@ -36,10 +41,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-       
+        // Tegner gress (bakgrunn i vinduet)
         Rectangle gress = new Rectangle(0, 0, VINDU_BREDDE, VINDU_HØYDE);
         gress.setFill(Color.GREEN);
         hovedpanel.getChildren().add(gress);
+
+        // Tegner veikryssene
         veikryssTab.add(new Veikryss(hovedpanel, 200, 150, VEI_BREDDE, true, false, false, true)); // Øvre venstre
         veikryssTab.add(new Veikryss(hovedpanel, 600, 150, VEI_BREDDE, true, true, false, false)); // Øvre høyre
         veikryssTab.add(new Veikryss(hovedpanel, 200, 450, VEI_BREDDE, false, false, true, true)); // Nedre venstre
@@ -51,8 +58,12 @@ public class App extends Application {
             startBilLogikk(kryss);
         }
 
-        flyttBil();
+        // Start trafikkoppdatering
+        oppdaterTrafikkLogikk();
 
+        // Flytt biler
+        flyttBil();
+        
         //Setter opp scenen
         Scene scene = new Scene(hovedpanel, VINDU_BREDDE, VINDU_HØYDE);
         stage.setScene(scene);
@@ -80,56 +91,40 @@ public class App extends Application {
         new Thread(() -> {
             try {
                 while (true) {
-                    // Sett nord/sør til grønt og øst/vest til rødt
+                    // 💡 Grønt for nord/sør – rødt for øst/vest
                     Platform.runLater(() -> {
-                        for (Trafikklys lys : nordSørLys) {
-                            lys.setStatus(2); // Grønt
-                        }
-                        for (Trafikklys lys : østVestLys) {
-                            lys.setStatus(0); // Rødt
-                        }
+                        for (Trafikklys lys : nordSørLys) lys.setStatus(2); // Grønt
+                        for (Trafikklys lys : østVestLys) lys.setStatus(0); // Rødt
                     });
-                    Thread.sleep(5000); // Vent 3 sekunder
-
-                    // Sett begge grupper til gult
+                    Thread.sleep(5000);
+        
+                    // 💡 Gult for nord/sør
                     Platform.runLater(() -> {
-                        for (Trafikklys lys : nordSørLys) {
-                            lys.setStatus(1); // Gult
-                        }
-                        for (Trafikklys lys : østVestLys) {
-                            lys.setStatus(1); // Gult
-                        }
+                        for (Trafikklys lys : nordSørLys) lys.setStatus(1); // Gult
                     });
-                    Thread.sleep(2000); // Vent 1 sekund
-
-                    // Sett nord/sør til rødt og øst/vest til grønt
+                    Thread.sleep(2000);
+        
+                    // 💡 Rødt for nord/sør – grønt for øst/vest
                     Platform.runLater(() -> {
-                        for (Trafikklys lys : nordSørLys) {
-                            lys.setStatus(0); // Rødt
-                        }
-                        for (Trafikklys lys : østVestLys) {
-                            lys.setStatus(2); // Grønt
-                        }
+                        for (Trafikklys lys : nordSørLys) lys.setStatus(0); // Rødt
+                        for (Trafikklys lys : østVestLys) lys.setStatus(2); // Grønt
                     });
-                    Thread.sleep(5000); // Vent 3 sekunder
-
-                    // Sett begge grupper til gult
+                    Thread.sleep(5000);
+        
+                    // 💡 Gult for øst/vest
                     Platform.runLater(() -> {
-                        for (Trafikklys lys : nordSørLys) {
-                            lys.setStatus(1); // Gult
-                        }
-                        for (Trafikklys lys : østVestLys) {
-                            lys.setStatus(1); // Gult
-                        }
+                        for (Trafikklys lys : østVestLys) lys.setStatus(1); // Gult
                     });
-                    Thread.sleep(1000); // Vent 1 sekund
+                    Thread.sleep(2000);
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }).start();
+        
     }
 
+    // Metode som starter bil-logikken for hvert veikryss
     private void startBilLogikk(Veikryss kryss) {
         new Thread(() -> {
             try {
@@ -161,12 +156,21 @@ public class App extends Application {
         //flytt bil
         new Thread(() -> {
             try {
-                while(true) {
+                while (true) {
                     synchronized (bilerTab) {
                         for (Bil b : bilerTab) {
-                            //finner en tilfeldig retning
-                            sjekkOgSving(b); // NB! skal fikse
-
+                            for (Veikryss kryss : veikryssTab) {
+                                if (Lyslogikk.bilenErNærKrysset(b, kryss)) {
+                                    // Hent relevant trafikklys og sjekk status
+                                    Trafikklys relevantLys = Lyslogikk.finnRelevantLys(b, kryss);
+                                    int status = relevantLys.getStatus();
+                                    if (status == 0 || status == 1) { // Rødt eller gult lys
+                                        b.stoppVedRødtLys(); // Stopp bilen
+                                    } else {
+                                        b.startVedGrøntLys(); // Fortsett å kjøre
+                                    }
+                                }
+                            }
                             Platform.runLater(() -> b.flyttBil());
                         }
                     }
@@ -177,11 +181,23 @@ public class App extends Application {
             }
         }).start();
     }
-
-    private void sjekkOgSving(Bil b) {
-        for (Veikryss kryss : veikryssTab) {
-            kryss.svingBilHvisNødvendig(b);
-        }
+    
+    // metode som oppdaterer trafikklogikken for alle veikryss
+    private void oppdaterTrafikkLogikk() {
+        new Thread(() -> {
+            try {
+                while (true) {
+                    Platform.runLater(() -> {
+                        for (Veikryss kryss : veikryssTab) {
+                            kryss.oppdaterTrafikk(); // Oppdater trafikken for hvert veikryss
+                        }
+                    });
+                    Thread.sleep(100); // Juster oppdateringsfrekvensen (100 ms her)
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
     
 }

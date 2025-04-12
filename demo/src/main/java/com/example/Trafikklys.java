@@ -1,6 +1,6 @@
 package com.example;
 
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableList; 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -27,6 +27,8 @@ public class Trafikklys extends Figur{
         
         trafikklysBoks = new Rectangle(bredde, høyde-2, Color.BLACK);
         trafikklysBoks.setStroke(Color.rgb(120,120,120));
+        trafikklysBoks.setArcWidth(12); //Runde kanter
+        trafikklysBoks.setArcHeight(12); //Runde kanter
 
         //tegner rødt og grønt lys
         rød = new Circle(bredde/2, bredde/6+(padding)-5, bredde/4);
@@ -83,6 +85,11 @@ public class Trafikklys extends Figur{
     public void setStatus(int nyStatus) {
         this.status = nyStatus;
         oppdaterLys();
+    }
+
+    //getMetode for trafikklys
+    public Trafikklys getTrafikklys() {
+        return this;
     }
 
     //getMetode for status

@@ -1,11 +1,8 @@
 package com.example;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
-import java.util.List;
 
 //Importerer bredden på veien for å tegne passende bilstørrelse
 import static com.example.App.VEI_BREDDE;
@@ -20,9 +17,10 @@ public class Bil extends Figur{
     protected Group bilGruppe; //NB! ikke i bruk ATM. (bruk senere for å designe bilene)
     protected Rectangle bilFigur; //Hovedelementet (karosseri til bilen)
     protected double vinkel;
-    protected boolean harSvingt = false;
-    protected boolean harPassert = false;
+    protected boolean stoppVedRødtLys = false;
+    protected boolean erIKrysset = false;
     protected Trafikklys trafikklys;
+    protected double hastighet = 2; // Hastigheten bilen beveger seg med
 
     //parameterløs konstruktør
     public Bil() {
@@ -48,20 +46,24 @@ public class Bil extends Figur{
 
     //metode som flytter bilen basert på retningen
     public void flyttBil() {
-        double hasighet = 2; // Hastigheten bilen beveger seg med
+        if (stoppVedRødtLys) {
+            return; // Stopp bilen hvis det er rødt lys
+        }
+        
+        hastighet = 2; // Hastigheten bilen beveger seg med
 
         switch ((int) vinkel) {
             case 0: // Ned (nedover langs y-aksen)
-                yPos += hasighet;
+                yPos += hastighet;
                 break;
             case 90: // Mot venstre ("bakover" langs x-aksen)
-                xPos -= hasighet;
+                xPos -= hastighet;
                 break;
             case 180: // Opp (oppover langs y-aksen)
-                yPos -= hasighet;
+                yPos -= hastighet;
                 break;
             case 270: // Mot høyre ("fremover" langs x-aksen)
-                xPos += hasighet;
+                xPos += hastighet;
                 break;
         }
         oppdaterPosisjon(); // Oppdater grafisk posisjon
@@ -73,7 +75,8 @@ public class Bil extends Figur{
         bilFigur.setY(yPos);
     }
 
-    /**
+
+   /**
      * @return en rektangel som representerer bilen
      */
     //metode for å tegne bil
@@ -82,6 +85,8 @@ public class Bil extends Figur{
     public Rectangle lagBilGruppe() {
         //tegner karoseri til bilen
         bilFigur = new Rectangle(xPos, yPos, BIL_BREDDE, BIL_HØYDE );
+        bilFigur.setArcWidth(6); //Runde kanter
+        bilFigur.setArcHeight(6); //Runde kanter
 
         //setter farge
         bilFigur.setFill(farge);
@@ -102,7 +107,16 @@ public class Bil extends Figur{
         return bilGruppe;
     }
 
-    //set metoder
+    //metoder for å kontrollere stopp/start ved rødt lys
+    // setter stoppVedRødtLys til true
+    public void stoppVedRødtLys() {
+        this.stoppVedRødtLys = true;
+    }
+    // setter stoppVedRødtLys til false
+    public void startVedGrøntLys() {
+        this.stoppVedRødtLys = false;
+    }
+
     /**
      * @param farge Ny farge for bilen.
      */
@@ -132,29 +146,12 @@ public class Bil extends Figur{
         return BIL_HØYDE;
     }
 
-    public boolean harSvingt() {
-        return harSvingt;
+    public boolean erIKrysset() {
+        return erIKrysset;
     }
 
-    //metode som returnerer om bilen allerede har svingt 1 gang
-    //laget for å unngå at bilene svinger flere ganger
-    public void setHarSvingt(boolean harSvingt) {
-        this.harSvingt = harSvingt;
-    }
-
-    //returnerer om bilen allerede har svingt
-    public boolean getHarSvingt() {
-        return harSvingt;
-    }
-
-    //Set om bilen har passert sin tilhørende grense
-    public void setHarPassert(boolean harPassert) {
-        this.harPassert = harPassert;
-    }
-
-    //om bilen har passert sin tilhørende grense
-    public boolean getHarPassert() {
-        return harPassert;
+    public void setErIKrysset(boolean verdi) {
+        this.erIKrysset = verdi;
     }
 
     //returnerer bilens tilhørende trafikklys
@@ -172,5 +169,34 @@ public class Bil extends Figur{
     @Override
     public double getYPos() {
         return bilFigur.getY();
+    }
+
+    public double getBredde() {
+        return BIL_BREDDE;
+    }
+
+    public double getHøyde() {
+        return BIL_HØYDE;
+    }
+
+    public boolean sjekkOmIKrysset(Rectangle kryss) {
+        return bilFigur.getBoundsInParent().intersects(kryss.getBoundsInParent());
+    }
+    
+    public boolean bilenErNærKryss(double kryssX, double kryssY, double veiBredde) {
+        double margin = 25; // Hvor langt unna bilen kan være før den skal stoppe
+    
+        switch ((int) vinkel) {
+            case 0: // NED (beveger seg nedover langs y-aksen)
+                return yPos + BIL_HØYDE >= kryssY - veiBredde / 2 - margin;
+            case 90: // VENSTRE (beveger seg mot venstre langs x-aksen)
+                return xPos <= kryssX + veiBredde / 2 + margin;
+            case 180: // OPP (beveger seg oppover langs y-aksen)
+                return yPos <= kryssY + veiBredde / 2 + margin;
+            case 270: // HØYRE (beveger seg mot høyre langs x-aksen)
+                return xPos + BIL_BREDDE >= kryssX - veiBredde / 2 - margin;
+            default:
+                return false;
+        }
     }
 }

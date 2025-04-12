@@ -18,11 +18,11 @@ public class StartPosisjon {
     }
 
     public double getStartX() {
-        return startX;
+        return this.startX;
     }
 
     public double getStartY() {
-        return startY;
+        return this.startY;
     }
 
     public double getRetning() {
