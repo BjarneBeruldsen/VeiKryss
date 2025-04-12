@@ -251,6 +251,7 @@ public class Veikryss {
                 continue; // Hvis bilen ikke har et trafikklys, hopp over
             }
     
+        /* Ikke i bruk ATM. Husk å fjerne før innlevering om det fortsatt er tilfellet.
             if (trafikkLys.getStatus() == 2 && !bil.erIKrysset()) {
                 // GRØNT lys og bilen er ikke i krysset → Kjør inn i krysset
                 bil.flyttBil();
@@ -263,6 +264,7 @@ public class Veikryss {
                 // RØDT lys og bilen er ikke i krysset → STOPP
                 bil.stoppVedRødtLys();
             }
+            */
         }
     }
 

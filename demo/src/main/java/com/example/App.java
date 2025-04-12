@@ -165,7 +165,7 @@ public class App extends Application {
                             }
                         }
                     });
-                    Thread.sleep(2000); // Juster bilspawn-intervall her
+                    Thread.sleep(5000); // Juster bilspawn-intervall her
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -201,6 +201,7 @@ public class App extends Application {
                                     } else {
                                         if (b.erStoppet()) {
                                             b.startVedGrøntLys(); // Fortsett å kjøre
+                                            b.sving(relevantLys); // Sving bilen
                                             logger.logg("Bil kjører videre på GRØNT lys ved kryss (" +
                                                     kryss.getX() + ", " + kryss.getY() + ")");
                                         }

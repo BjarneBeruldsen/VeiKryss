@@ -9,6 +9,11 @@ import javafx.scene.shape.Rectangle;
 //Importerer bredden på veien for å tegne passende bilstørrelse
 import static com.example.App.VEI_BREDDE;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
 public class Bil extends Figur {
     //finner bredde og lengde på bil
     private final static int BIL_BREDDE = VEI_BREDDE / 3;
@@ -90,29 +95,43 @@ public class Bil extends Figur {
         int valg = (int) (Math.random() * 3) + 1;
 
         // Bestem ny retning og posisjon basert på svingvalg
+        
+        /* NB! inneholder noen "tester".
+         * prøver å få smoothSving til å fungere slik at bilen beveger
+         * seg til nytt felt og ikke bare 'hopper' dit.
+         * Fungerer bare for én av svingene for de fire vinklene
+         * TBC: lage en bedre løsning for å få smoothSving til å fungere 
+         * for begge svingene og at det ser bedre ut enn det jgør nå
+         */
+
         // Hvis bilen kommer fra nord
         if (opprinneligRetning == 0) {
             switch (valg) {
+                //case 1: smoothSving fungerer ikke.
                 case 1: { setXPos(getXPos() + VEI_BREDDE); setYPos(getYPos() + VEI_BREDDE); setVinkel(270); }; break;
-                case 2: { setXPos(getXPos() - VEI_BREDDE/2); setYPos(getYPos() + VEI_BREDDE/2); setVinkel(90); }; break;
+                case 2: smoothSving(getXPos() - VEI_BREDDE/2, getYPos() + VEI_BREDDE/2, 90); break;
                 default: break;
             }
         }
-
+        
         // Hvis bilen kommer fra øst
         if (opprinneligRetning == 90) {
             switch (valg) {
+                //case 1: smoothSving fungerer ikke.
                 case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() + VEI_BREDDE); setVinkel(0); }; break;
-                case 2: { setXPos(getXPos() - VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(180); }; break;
-                default: break;
+                //case 2: { setXPos(getXPos() - VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(180); }; break;
+                case 2: smoothSving( getXPos() - VEI_BREDDE/2, getYPos() - VEI_BREDDE/2, 180); break;
+               default: break;
             }
         }
 
         // Hvis bilen kommer fra sør
         if (opprinneligRetning == 180) {
             switch (valg) {
-                case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(90); }; break;
+                case 1: smoothSving(getXPos() + VEI_BREDDE/2, getYPos() - VEI_BREDDE, 90); break;
+                //case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(90); }; break;
                 case 2: { setXPos(getXPos() + VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(270); }; break;
+                //case 2: smoothSving fungerer ikke.
                 default: break;
             }
         }
@@ -120,14 +139,46 @@ public class Bil extends Figur {
         // hvis bilen kommer fra vest
         if (opprinneligRetning == 270) {
             switch (valg) {
-                case 1: { setXPos(getXPos() + VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(180); }; break;
+                case 1: smoothSving(getXPos() + VEI_BREDDE, getYPos() - VEI_BREDDE, 180); break;
+              //case 1: { setXPos(getXPos() + VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(180); }; break;
                 case 2: { setXPos(getXPos() + VEI_BREDDE/2); setYPos(getYPos() + VEI_BREDDE/2); setVinkel(0); }; break;
+              //case 2: smoothSving fungerer ikke.
                 default: break;
             }
         }
 
         // Oppdater bilens grafiske posisjon etter sving
         oppdaterPosisjon();
+    }
+
+    public void smoothSving(double nyX, double nyY, double nyVinkel) {
+        // Opprett en Timeline for animasjonen
+        Timeline timeline = new Timeline();
+
+        // Animer X-posisjon
+        KeyValue xKeyValue = new KeyValue(bilFigur.xProperty(), nyX);
+        KeyFrame xKeyFrame = new KeyFrame(Duration.millis(1000), xKeyValue);
+
+        // Animer Y-posisjon
+        KeyValue yKeyValue = new KeyValue(bilFigur.yProperty(), nyY);
+        KeyFrame yKeyFrame = new KeyFrame(Duration.millis(1000), yKeyValue);
+
+        // Animer rotasjon (vinkel)
+        KeyValue vinkelKeyValue = new KeyValue(bilFigur.rotateProperty(), nyVinkel);
+        KeyFrame vinkelKeyFrame = new KeyFrame(Duration.millis(1000), vinkelKeyValue);
+
+        // Legg til KeyFrames i Timeline
+        timeline.getKeyFrames().addAll(xKeyFrame, yKeyFrame, vinkelKeyFrame);
+
+        // Start animasjonen
+        timeline.play();
+
+        // Oppdater bilens interne verdier etter animasjonen
+        timeline.setOnFinished(e -> {
+            setXPos(nyX);
+            setYPos(nyY);
+            setVinkel(nyVinkel);
+        });
     }
 
     /**
