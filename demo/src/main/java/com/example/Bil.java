@@ -128,8 +128,8 @@ public class Bil extends Figur {
         // Hvis bilen kommer fra sør
         if (opprinneligRetning == 180) {
             switch (valg) {
-                case 1: smoothSving(getXPos() + VEI_BREDDE/2, getYPos() - VEI_BREDDE, 90); break;
-                //case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(90); }; break;
+                //case 1: smoothSving(getXPos() + VEI_BREDDE/2, getYPos() - VEI_BREDDE, 90); break;
+                case 1: { setXPos(getXPos() - VEI_BREDDE); setYPos(getYPos() - VEI_BREDDE); setVinkel(90); }; break;
                 case 2: { setXPos(getXPos() + VEI_BREDDE/2); setYPos(getYPos() - VEI_BREDDE/2); setVinkel(270); }; break;
                 //case 2: smoothSving fungerer ikke.
                 default: break;

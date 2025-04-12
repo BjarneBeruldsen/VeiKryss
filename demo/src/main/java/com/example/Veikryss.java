@@ -9,6 +9,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 import static com.example.App.VINDU_HØYDE; //import av VINDU_HØYDE. Brukes for å tegne veikrysset
+import static com.example.App.VEI_BREDDE; //import av VEI_BREDDE. Brukes for å tegne veikrysset
 // Importerer retningene for å plassere bilene i veikrysset
 import static com.example.App.RETNING_NED; 
 import static com.example.App.RETNING_OPP;
