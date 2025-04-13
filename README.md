@@ -1,7 +1,7 @@
-#Veikryss Trafikksimulering
+# Veikryss Trafikksimulering
 Dette JavaFX-programmet simulerer trafikkflyt i et nettverk av veikryss med biler og trafikklys. Det gir en visuell representasjon av biler som genereres ved veikryss og følger trafikklyslogikk når de beveger seg rundt på kartet.
 
-##Funksjonalitet: 
+## Funksjonalitet: 
 - Simulerte veikryss med trafikklys i fire retninger.
 
 - Automatisk bilgenerering ved veikryss.
@@ -16,5 +16,5 @@ Dette JavaFX-programmet simulerer trafikkflyt i et nettverk av veikryss med bile
 
 - Statistikk over trafikkflyt vises hvert 10. sekund (f.eks. hvor mange biler som står stille).
 
-##Forfattere
+## Forfattere
 Bjarne Beruldsen, Severin Waller Sørensen, Laurent Zogaj & Abdinasir Ali
