@@ -55,27 +55,31 @@ public class Bil extends Figur {
 
     //metode som flytter bilen basert på retningen
     public void flyttBil() {
-        if (stoppVedRødtLys) {
-            return; // Stopp bilen hvis det er rødt lys
-        }
+        try {
+            if (stoppVedRødtLys) {
+                return; // Stopp bilen hvis det er rødt lys
+            }
 
-        hastighet = 2; // Hastigheten bilen beveger seg med
+            hastighet = 2; // Hastigheten bilen beveger seg med
 
-        switch ((int) vinkel) {
-            case 0: // Ned (nedover langs y-aksen)
-                yPos += hastighet;
-                break;
-            case 90: // Mot venstre ("bakover" langs x-aksen)
-                xPos -= hastighet;
-                break;
-            case 180: // Opp (oppover langs y-aksen)
-                yPos -= hastighet;
-                break;
-            case 270: // Mot høyre ("fremover" langs x-aksen)
-                xPos += hastighet;
-                break;
+            switch ((int) vinkel) {
+                case 0: // Ned (nedover langs y-aksen)
+                    yPos += hastighet;
+                    break;
+                case 90: // Mot venstre ("bakover" langs x-aksen)
+                    xPos -= hastighet;
+                    break;
+                case 180: // Opp (oppover langs y-aksen)
+                    yPos -= hastighet;
+                    break;
+                case 270: // Mot høyre ("fremover" langs x-aksen)
+                    xPos += hastighet;
+                    break;
+            }
+            oppdaterPosisjon(); // Oppdater grafisk posisjon
+        } catch (Exception e) {
+            System.err.println("Feil ved flytting av bil" + e.getMessage());
         }
-        oppdaterPosisjon(); // Oppdater grafisk posisjon
     }
 
     //metode som oppdaterer bilens posisjon

@@ -1,4 +1,5 @@
 //Authors: Bjarne Beruldsen, Severin Waller Sørensen
+//Collaborator: Laurent Zogaj
 
 package com.example;
 
@@ -62,6 +63,7 @@ public class Trafikklys extends Figur{
 
     //metode som oppdaterer lysene basert på status
     private void oppdaterLys() {
+        try {
         if (status == 0) { // Rødt lys
             rød.setFill(Color.rgb(255, 0, 0)); // På
             gul.setFill(Color.rgb(64, 64, 5)); // Av
@@ -74,6 +76,9 @@ public class Trafikklys extends Figur{
             rød.setFill(Color.rgb(120, 0, 0)); // Av
             gul.setFill(Color.rgb(64, 64, 0)); // Av
             grønn.setFill(Color.rgb(17, 235, 0)); // På
+        }
+    } catch (Exception e) {
+        System.err.println("Feil ved oppdatering av lys" + e.getMessage());
         }
     }
 
