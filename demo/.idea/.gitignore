@@ -1,6 +1,7 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/demo/target/
 # Created by https://www.toptal.com/developers/gitignore/api/java,maven,intellij,macos,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,maven,intellij,macos,windows
 
