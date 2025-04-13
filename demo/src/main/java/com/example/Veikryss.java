@@ -84,15 +84,16 @@ public class Veikryss {
     }
 
     // Finner midtsonen (der veiene overlapper i veikrysset)
-    // Har laget er firkant slik at det hjelper visuelt med å 
-    // se hvor midten er, men tenker å fjerne det senere.
+    // setStroke brukt til å markere/definere midten av krysset 
+    // slått av og på underveis i koding slik at det bl.a. ble lettere
+    // å se hvor grensene til krysset gikk og hvor nær bilene var.
     public Rectangle midtSone() {
         double x = startX - veiBredde / 2;
         double y = startY - veiBredde / 2;
         double lengde = veiBredde;
 
         Rectangle midten = new Rectangle(x, y, lengde, lengde);
-        midten.setStroke(Color.rgb(0, 0, 0)); // Sort  
+        // midten.setStroke(Color.rgb(0, 0, 0)); // Slå på (fjern kommentarstreker) for å se midten
         midten.setFill(null); // Gjennomsiktig 
         panel.getChildren().add(midten);
         return midten;
@@ -156,7 +157,7 @@ public class Veikryss {
         }
     }
 
-    // 
+    // metode som legger til bil i panelet
     public void leggTilBil(Bil bil) {
         bilerTab.add(bil);
         panel.getChildren().add(bil.lagBilGruppe());
@@ -230,7 +231,6 @@ public class Veikryss {
     }
 
 
-
     // getMetode for veiBredde
     public double getBredde() {
         return veiBredde;
@@ -251,21 +251,6 @@ public class Veikryss {
             if (trafikkLys == null) {
                 continue; // Hvis bilen ikke har et trafikklys, hopp over
             }
-    
-        /* Ikke i bruk ATM. Husk å fjerne før innlevering om det fortsatt er tilfellet.
-            if (trafikkLys.getStatus() == 2 && !bil.erIKrysset()) {
-                // GRØNT lys og bilen er ikke i krysset → Kjør inn i krysset
-                bil.flyttBil();
-                bil.setErIKrysset(true); // Merk bilen som "i krysset"
-                bil.sving(trafikkLys); // Kall på sving-metoden
-            } else if (trafikkLys.getStatus() == 1 && bil.sjekkOmIKrysset(midtsone)) {
-                // GULT lys og bilen er i krysset → Kjør ferdig
-                bil.flyttBil();
-            } else if (trafikkLys.getStatus() == 0 && !bil.erIKrysset()) {
-                // RØDT lys og bilen er ikke i krysset → STOPP
-                bil.stoppVedRødtLys();
-            }
-            */
         }
     }
 

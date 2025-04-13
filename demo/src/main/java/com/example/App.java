@@ -1,4 +1,4 @@
-//Authors: Bjarne Beruldsen, Severin Waller Sørensen, Laurent Zogaj & Abdinasir Ali
+//Authors: Bjarne Beruldsen, Severin Waller Sørensen, Laurent Zogaj, Abdinasir Ali & Ylli Ujkani
 
 package com.example;
 

@@ -1,5 +1,5 @@
 //Authors: Bjarne Beruldsen, Severin Waller Sørensen
-//Collaborator: Laurent Zogaj
+//Collaborator: Laurent Zogaj & Ylli Ujkani
 
 package com.example;
 
