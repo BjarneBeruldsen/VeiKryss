@@ -1,4 +1,5 @@
 //Author: Severin Waller Sørensen
+//Collaborator: Laurent Zogaj
 
 package com.example;
 
@@ -17,7 +18,7 @@ public class Lyslogikk {
    
     // Sjekker om bilen er nær veikrysset (sentrert rundt startX og startY)
     public static boolean bilenErNærKrysset(Bil bil, Veikryss veikryss) {
-        
+        try {
         double avstand = 50;
         double vinkel = bil.getVinkel();
         double bilX = bil.getXPos();
@@ -33,21 +34,31 @@ public class Lyslogikk {
          } else if (vinkel == RETNING_HØYRE) {
             bilX += (bil.getHøyde()-15); // Bilen er på vei til høyre, så vi må justere X-posisjonen
         }
-       
         return Math.abs(bilX -kryssX) < avstand && Math.abs(bilY - kryssY) < avstand;
+    } catch (Exception e) {
+        System.err.println("Feil ved kontroll" + e.getMessage());
+        return false;
+        }
     }
 
 
     // Finner det lyset som bilen skal respondere til
     public static Trafikklys finnRelevantLys(Bil bil, Veikryss veikryss) {
+        try {
         int retning = (int) bil.getVinkel();
-
         switch (retning) {
             case RETNING_NED: return veikryss.getTrafikklysTab().get(1); // Retning nedover  
             case RETNING_HØYRE: return veikryss.getTrafikklysTab().get(2); // Retning høyre
             case RETNING_OPP: return veikryss.getTrafikklysTab().get(3); // Retning oppover
             case RETNING_VENSTRE: return veikryss.getTrafikklysTab().get(0); // Retning venstre
             default: return null; // Ingen lys funnet
+             }
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Feil ved indeks av trafikklys: " + e.getMessage());
+            return null;
+        } catch (Exception e) {
+            System.err.println("Feil ved kontroll: " + e.getMessage());
+            return null;
         }
     }
 
